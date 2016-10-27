@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import _ from 'lodash'
 
 const SHIP_TYPES = {
   Battleship: 1,
@@ -32,17 +33,18 @@ export function isShipCanBePlaced (newShip, ships) {
 export function occupiedSpace (ship) {
   const occupied = (coordinate) => {
     const result = [ ]
-    for (let i = coordinate.x - 1; i < coordinate.x + 1; i++)
-      for (let j = coordinate.y - 1; j < coordinate.y + 1; j++)
+    for (let i = coordinate.x - 1; i <= coordinate.x + 1; i++)
+      for (let j = coordinate.y - 1; j <= coordinate.y + 1; j++)
         result.push({ x: i, y: j })
     return result 
   }
-  Joi.assert(ship, shipSchemas)
-  switch (ship.shipTypes) {
-    case SHIP_TYPES.Battleship: {
-      
-    }
-  }
+  const spaces = realSpace(ship)
+  const allOccupiedSpaces = _.reduce(_.flatten(spaces.map(occupied)), (acc, val) => {
+    const key = JSON.stringify(val)
+    acc[key] = val
+    return acc
+  }, { })
+  return Object.values(allOccupiedSpaces)
 }
 
 export function realSpace (ship) {

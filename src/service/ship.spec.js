@@ -87,24 +87,24 @@ describe('isShipCanBePlaced', () => {
 })
 
 describe('occupiedSpace', () => {
-  // it('for battleship vertically, should return correct spaces', () => {
-  //   const input = {
-  //     shipTypes: 1,
-  //     coordinates: {
-  //       x: 1,
-  //       y: 1,
-  //     },
-  //     direction: 'horizontal'
-  //   }
-  //   const expected = [ ]
-  //   for (let x = 0; x < 5; x++) {
-  //     for (let y = 0; y < 5; y++) {
-  //       expected.push({ x, y })
-  //     }
-  //   }
-  //   const actual = Ship.occupiedSpace(input)
-  //   expect(actual).to.deep.equal(expected)
-  // })
+  it('for battleship vertically, should return correct spaces', () => {
+    const input = {
+      shipTypes: 1,
+      coordinates: {
+        x: 1,
+        y: 1,
+      },
+      direction: 'horizontal'
+    }
+    const expected = [ ]
+    for (let x = 0; x < 6; x++) {
+      for (let y = 0; y < 3; y++) {
+        expected.push({ x, y })
+      }
+    }
+    const actual = Ship.occupiedSpace(input)
+    expect(actual).to.deep.equal(expected)
+  })
 })
 
 describe('realSpace', () => {
