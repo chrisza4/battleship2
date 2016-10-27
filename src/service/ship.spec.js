@@ -14,8 +14,9 @@ describe('Ship service', () => {
         a: 1,
         b: 2
       },
-      direction: 'vertical'
-    }, 'round1').then(result => {
+      direction: 'vertical',
+      roundId: 'round1'
+    }).then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -30,8 +31,9 @@ describe('Ship service', () => {
         a: 1,
         b: 2
       },
-      direction: 'vertical'
-    }, 'round1').then(result => {
+      direction: 'vertical',
+      roundId: 'round1'
+    }).then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -46,8 +48,9 @@ describe('Ship service', () => {
         a: 1,
         b: 2
       },
-      direction: 'vertical'
-    }, 'round1').then(result => {
+      direction: 'vertical',
+      roundId: 'round1'
+    }).then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -62,7 +65,8 @@ describe('Ship service', () => {
         x: 1,
         y: 2
       },
-      direction: 'xxxx'
+      direction: 'xxxx',
+      roundId: 'round1'
     }), done)
     .catch(err => {
       done()
@@ -71,7 +75,7 @@ describe('Ship service', () => {
 
   it('should not be able to place ship on top of other', done =>{
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve([
+      getShipsByLatestRound: () => Promise.resolve([
         { 
           shipTypes: 4,
           coordinates: {
@@ -88,9 +92,10 @@ describe('Ship service', () => {
         x: 0,
         y: 0
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {
       expect(err.message).to.equal('Illegal placement: too near to another ship')
       done()
     })
@@ -98,7 +103,7 @@ describe('Ship service', () => {
 
   it('should not be able to place ship near each other', done =>{
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve([
+      getShipsByLatestRound: () => Promise.resolve([
         { 
           shipTypes: 4,
           coordinates: {
@@ -115,9 +120,10 @@ describe('Ship service', () => {
         x: 1,
         y: 1
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {
       expect(err.message).to.equal('Illegal placement: too near to another ship')
       done()
     })
@@ -130,9 +136,10 @@ describe('Ship service', () => {
         x: 11,
         y: 5
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1'), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace), done).catch(err => {
       expect(err.message).to.equal('Illegal placement: coordinate out of ocean')
       done()
     })
@@ -149,11 +156,12 @@ describe('Ship service', () => {
           x: 0,
           y: 0
         },
-        direction: 'vertical'
+        direction: 'vertical',
+        roundId: 'round1'
       })
     }
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve(mockShips)
+      getShipsByLatestRound: () => Promise.resolve(mockShips)
     }
     const shipToPlace = {
       shipTypes: 4,
@@ -161,9 +169,10 @@ describe('Ship service', () => {
         x: 9,
         y: 9
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {       
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {       
       expect(err.message).to.equal('Ship depleted')
       done()
     })
@@ -177,11 +186,12 @@ describe('Ship service', () => {
           x: 0,
           y: 0
         },
-        direction: 'vertical'
+        direction: 'vertical',
+        roundId: 'round1'
       }
     ]
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve(mockShips)
+      getShipsByLatestRound: () => Promise.resolve(mockShips)
     }
     const shipToPlace = {
       shipTypes: 1,
@@ -189,9 +199,10 @@ describe('Ship service', () => {
         x: 4,
         y: 4
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {
       expect(err.message).to.equal('Ship depleted')
       done()
     })
@@ -210,7 +221,7 @@ describe('Ship service', () => {
       getCruiser(), getCruiser()
     ]
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve(mockShips)
+      getShipsByLatestRound: () => Promise.resolve(mockShips)
     }
     const shipToPlace = {
       shipTypes: 2,
@@ -218,9 +229,10 @@ describe('Ship service', () => {
         x: 4,
         y: 4
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {
       expect(err.message).to.equal('Ship depleted')
       done()
     })
@@ -233,13 +245,14 @@ describe('Ship service', () => {
         x: 8,
         y: 8
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve([ ]),
+      getShipsByLatestRound: () => Promise.resolve([ ]),
       saveShip: () => Promise.resolve('ok')
     }
-    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+    assertThrowPromise(Ship.place(shipToPlace, mockDataLayer), done).catch(err => {
       expect(err.message).to.equal('Illegal placement: coordinate out of ocean')
       done()
     })
@@ -252,13 +265,14 @@ describe('Ship service', () => {
         x: 4,
         y: 4
       },
-      direction: 'vertical'
+      direction: 'vertical',
+      roundId: 'round1'
     }
     const mockDataLayer = {
-      getShipsByRound: () => Promise.resolve([ ]),
+      getShipsByLatestRound: () => Promise.resolve([ ]),
       saveShip: () => Promise.resolve('ok')
     }
-    return Ship.place(shipToPlace, 'round1', mockDataLayer).then(result =>{
+    return Ship.place(shipToPlace, mockDataLayer).then(result =>{
       expect(result).to.equal('ok')
     })
   })

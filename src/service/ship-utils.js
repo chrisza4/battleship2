@@ -1,4 +1,4 @@
-import { SHIP_TYPES } from './ship'
+import { SHIP_TYPES } from '../data/ship-data'
 
 export function flatArrayWithFilter (doubleArray, filterer) {
   return doubleArray.reduce((acc, array) => {

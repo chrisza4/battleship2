@@ -1,10 +1,10 @@
-// var express = require('express')
-// var app = express()
-
 import express from 'express'
 import setup from './endpoints/setup'
+import BodyParser from 'body-parser'
 
 const app = express()
+app.use(BodyParser.json())
+app.use(BodyParser.urlencoded({ extended: true }))
 
 setup(app)
 
