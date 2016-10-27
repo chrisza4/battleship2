@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const RoundData = require('./round-data')
 
 export const SHIP_TYPES = {
   Battleship: 1,
@@ -21,12 +22,7 @@ export function createShipData (db) {
   return {
     saveShip (toSave) {
       Joi.assert(toSave, shipSchemas)
-      return db.collection('rounds').find({}).sort({ created: -1 }).limit(1).toArray().then(rounds => {         
-        if (!rounds || !rounds.length) return db.collection('rounds').insert({
-          created: new Date()
-        }).then(r => r.ops)
-        return rounds[0]        
-      })
+      return RoundData.getLatestRound(db)
       .then(round => {
         const roundId = String(round._id)
         return db.collection('ships').insert(Object.assign({ }, toSave, { roundId }))
@@ -34,10 +30,9 @@ export function createShipData (db) {
     },
 
     getShipsByLatestRound () {
-      return db.collection('rounds').find({}).sort({ created: -1 }).limit(1).toArray().then(rounds => {
-        if (!rounds || !rounds.length) return [ ]
+      return RoundData.getLatestRound(db).then(round => {
         return db.collection('ships').find({
-          roundId: String(rounds[0]._id)
+          roundId: String(round._id)
         }).toArray()
       })
     },

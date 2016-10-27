@@ -25,7 +25,6 @@ export default function setup (app) {
         res.json(result)
       })
       .catch(err => {
-        console.log(err)
         res.status(500).send(err.message)
       })
     })
