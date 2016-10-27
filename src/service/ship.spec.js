@@ -2,6 +2,11 @@ import { expect } from 'chai'
 import * as Ship from './ship'
 
 describe('Ship service', () => {
+
+  function assertThrowPromise (promiseFunc, done) {
+    return promiseFunc.then(d => done('should throw'))
+  }
+
   it('should assert ship types', (done) => {
     Ship.place({
       shipTypes: 6,
@@ -10,7 +15,7 @@ describe('Ship service', () => {
         b: 2
       },
       direction: 'vertical'
-    }).then(result => {
+    }, 'round1').then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -26,7 +31,7 @@ describe('Ship service', () => {
         b: 2
       },
       direction: 'vertical'
-    }).then(result => {
+    }, 'round1').then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -35,14 +40,14 @@ describe('Ship service', () => {
   })
 
   it('should assert ship coordinate', (done) => {
-    Ship.place({
+    return Ship.place({
       shipTypes: 2,
       coordinates: {
         a: 1,
         b: 2
       },
       direction: 'vertical'
-    }).then(result => {
+    }, 'round1').then(result => {
       done('should not pass')
     })
     .catch(err => {
@@ -51,202 +56,210 @@ describe('Ship service', () => {
   })
 
   it('should assert direction', done => {
-    Ship.place({
+    assertThrowPromise(Ship.place({
       shipTypes: 2,
       coordinates: {
         x: 1,
         y: 2
       },
       direction: 'xxxx'
-    }).then(result => {
-      done('should not pass')
-    })
+    }), done)
     .catch(err => {
       done()
     })
   })
 
-  // it('should not be able to place ship near each other', done =>{
-    
-  //   Ship.place({
-  //     shipTypes: 2,
-  //     coordinates: {
-  //       x: 0,
-  //       y: 0
-  //     },
-  //     direction: 'vertical'
-  //   })
-
-  // })
-})
-
-describe('isShipCanBePlaced', () => {
-  it('should return false if ship was placed nearby diagonally', () => {
-
+  it('should not be able to place ship on top of other', done =>{
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve([
+        { 
+          shipTypes: 4,
+          coordinates: {
+            x: 0,
+            y: 0
+          },
+          direction: 'vertical'
+        }
+      ])
+    }
+    const shipToPlace = {
+      shipTypes: 2,
+      coordinates: {
+        x: 0,
+        y: 0
+      },
+      direction: 'vertical'
+    }
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+      expect(err.message).to.equal('Illegal placement: too near to another ship')
+      done()
+    })
   })
-})
 
-describe('occupiedSpace', () => {
-  it('for battleship vertically, should return correct spaces', () => {
-    const input = {
-      shipTypes: 1,
+  it('should not be able to place ship near each other', done =>{
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve([
+        { 
+          shipTypes: 4,
+          coordinates: {
+            x: 0,
+            y: 0
+          },
+          direction: 'vertical'
+        }
+      ])
+    }
+    const shipToPlace = {
+      shipTypes: 2,
       coordinates: {
         x: 1,
-        y: 1,
+        y: 1
       },
-      direction: 'horizontal'
+      direction: 'vertical'
     }
-    const expected = [ ]
-    for (let x = 0; x < 6; x++) {
-      for (let y = 0; y < 3; y++) {
-        expected.push({ x, y })
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+      expect(err.message).to.equal('Illegal placement: too near to another ship')
+      done()
+    })
+  })
+
+  it('should not be able to place ship outside board', done => {
+    const shipToPlace = {
+      shipTypes: 2,
+      coordinates: {
+        x: 11,
+        y: 5
+      },
+      direction: 'vertical'
+    }
+    assertThrowPromise(Ship.place(shipToPlace, 'round1'), done).catch(err => {
+      expect(err.message).to.equal('Illegal placement: coordinate out of ocean')
+      done()
+    })
+  })
+
+  it('should not be able to place more than 10 ship per round', done => {
+    const mockShips = [ ]
+
+    // Create 10 ships
+    for (let i = 0; i < 10; i++) {
+      mockShips.push({ 
+        shipTypes: 4,
+        coordinates: {
+          x: 0,
+          y: 0
+        },
+        direction: 'vertical'
+      })
+    }
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve(mockShips)
+    }
+    const shipToPlace = {
+      shipTypes: 4,
+      coordinates: {
+        x: 9,
+        y: 9
+      },
+      direction: 'vertical'
+    }
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {       
+      expect(err.message).to.equal('Ship depleted')
+      done()
+    })
+  })
+
+  it('should not be able to place battleship more than 1', done => {
+    const mockShips = [ 
+      { 
+        shipTypes: 1,
+        coordinates: {
+          x: 0,
+          y: 0
+        },
+        direction: 'vertical'
       }
+    ]
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve(mockShips)
     }
-    const actual = Ship.occupiedSpace(input)
-    expect(actual).to.deep.equal(expected)
-  })
-})
-
-describe('realSpace', () => {
-  it('should return correct ship space for battleship horizontally', () => {
-    const input = {
+    const shipToPlace = {
       shipTypes: 1,
       coordinates: {
-        x: 1,
-        y: 1,
-      },
-      direction: 'horizontal'
-    }
-    const expected = [ 
-      { x:1, y: 1 },
-      { x:2, y: 1 },
-      { x:3, y: 1 },
-      { x:4, y: 1 },
-    ]
-    const actual = Ship.realSpace(input)
-    expect(actual).to.deep.equal(expected)
-
-   
-  })
-
-  it('should return correct ship space for battleship vertically', () => {
-     const input2 = {
-      shipTypes: 1,
-      coordinates: {
-        x: 1,
-        y: 1,
+        x: 4,
+        y: 4
       },
       direction: 'vertical'
     }
-    const expected2 = [ 
-      { x:1, y: 1 },
-      { x:1, y: 2 },
-      { x:1, y: 3 },
-      { x:1, y: 4 },
-    ]
-    const actual2 = Ship.realSpace(input2)
-    expect(actual2).to.deep.equal(expected2)
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+      expect(err.message).to.equal('Ship depleted')
+      done()
+    })
   })
 
-  it('should return correct ship space for cruisers horizontally', () => {
-    const input = {
+  it('should not be able to place cruiser more than 2', done => {
+    const getCruiser = () => ({ 
       shipTypes: 2,
       coordinates: {
-        x: 1,
-        y: 1,
+        x: 0,
+        y: 0
       },
-      direction: 'horizontal'
-    }
-    const expected = [ 
-      { x:1, y: 1 },
-      { x:2, y: 1 },
-      { x:3, y: 1 }, 
+      direction: 'vertical'
+    })
+    const mockShips = [ 
+      getCruiser(), getCruiser()
     ]
-    const actual = Ship.realSpace(input)
-    expect(actual).to.deep.equal(expected)
-  })
-
-  it('should return correct ship space for cruisers vertically', () => {
-     const input2 = {
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve(mockShips)
+    }
+    const shipToPlace = {
       shipTypes: 2,
       coordinates: {
-        x: 1,
-        y: 1,
+        x: 4,
+        y: 4
       },
       direction: 'vertical'
     }
-    const expected2 = [ 
-      { x:1, y: 1 },
-      { x:1, y: 2 },
-      { x:1, y: 3 },
-    ]
-    const actual2 = Ship.realSpace(input2)
-    expect(actual2).to.deep.equal(expected2)
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+      expect(err.message).to.equal('Ship depleted')
+      done()
+    })
   })
 
-  it('should return correct ship space for destroyers horizontally', () => {
-    const input = {
-      shipTypes: 3,
+  it('cannot place ship too near to the edge of ocean', done => {
+    const shipToPlace = {
+      shipTypes: 2,
       coordinates: {
-        x: 1,
-        y: 1,
-      },
-      direction: 'horizontal'
-    }
-    const expected = [ 
-      { x:1, y: 1 },
-      { x:2, y: 1 }, 
-    ]
-    const actual = Ship.realSpace(input)
-    expect(actual).to.deep.equal(expected)
-  })
-
-  it('should return correct ship space for destroyers vertically', () => {
-     const input2 = {
-      shipTypes: 3,
-      coordinates: {
-        x: 1,
-        y: 1,
+        x: 8,
+        y: 8
       },
       direction: 'vertical'
     }
-    const expected2 = [ 
-      { x:1, y: 1 },
-      { x:1, y: 2 },
-    ]
-    const actual2 = Ship.realSpace(input2)
-    expect(actual2).to.deep.equal(expected2)
-  })
-
-  it('should return correct ship space for submarine horizontally', () => {
-    const input = {
-      shipTypes: 4,
-      coordinates: {
-        x: 1,
-        y: 1,
-      },
-      direction: 'horizontal'
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve([ ]),
+      saveShip: () => Promise.resolve('ok')
     }
-    const expected = [ 
-      { x:1, y: 1 }, 
-    ]
-    const actual = Ship.realSpace(input)
-    expect(actual).to.deep.equal(expected)
+    assertThrowPromise(Ship.place(shipToPlace, 'round1', mockDataLayer), done).catch(err => {
+      expect(err.message).to.equal('Illegal placement: coordinate out of ocean')
+      done()
+    })
   })
 
-  it('should return correct ship space for submarine vertically', () => {
-     const input2 = {
-      shipTypes: 4,
+  it('should save ship if all condition satisfied', () => {
+    const shipToPlace = {
+      shipTypes: 2,
       coordinates: {
-        x: 1,
-        y: 1,
+        x: 4,
+        y: 4
       },
       direction: 'vertical'
     }
-    const expected2 = [ 
-      { x:1, y: 1 },
-    ]
-    const actual2 = Ship.realSpace(input2)
-    expect(actual2).to.deep.equal(expected2)
+    const mockDataLayer = {
+      getShipsByRound: () => Promise.resolve([ ]),
+      saveShip: () => Promise.resolve('ok')
+    }
+    return Ship.place(shipToPlace, 'round1', mockDataLayer).then(result =>{
+      expect(result).to.equal('ok')
+    })
   })
 })
