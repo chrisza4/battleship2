@@ -35,7 +35,8 @@ export function getAttackResult (currenAttack, oldAttacks, ships) {
   }, [ ])
   if (alreadyHitSpot.length >= allCoordinates.length) {
     return {
-      message: 'won'
+      message: 'won',
+      count: allAttacks.length,
     }
   }
   for (const ship of ships) {

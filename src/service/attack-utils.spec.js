@@ -104,7 +104,9 @@ describe('getAttackResult', () => {
         y: 3
       },
     })
-    expect(AttackUtils.getAttackResult(attack1, [ attack2, attack3 ], [ ship1 ]).message).to.equal('won')
+    const result = AttackUtils.getAttackResult(attack1, [ attack2, attack3 ], [ ship1 ])
+    expect(result.message).to.equal('won')
+    expect(result.count).to.equal(3)
   })
 
   it('should return sank ship type if last hit sank the submarine', () => {
