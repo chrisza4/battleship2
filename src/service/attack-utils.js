@@ -23,8 +23,10 @@ export function getHitableSpaces (ships) {
 export function getAttackResult (currenAttack, oldAttacks, ships) {
   const allCoordinates = _.flatten(ships.map(realSpace))
   if (!_.some(allCoordinates, c => isSameCoordinate(c, currenAttack.coordinates))) {
-    return 'miss'
-  }
+    return {
+      message: 'miss'
+    }
+  }  
   const allAttacks = [ currenAttack, ...oldAttacks ]
   const attackedCoor = allAttacks.map(d => d.coordinates)
   const alreadyHitSpot = _.reduce(allCoordinates, (acc, co) => {
@@ -32,7 +34,38 @@ export function getAttackResult (currenAttack, oldAttacks, ships) {
     return acc
   }, [ ])
   if (alreadyHitSpot.length >= allCoordinates.length) {
-    return 'won'
+    return {
+      message: 'won'
+    }
   }
+  for (const ship of ships) {
+    const shipSpaces = realSpace(ship)
+    if (isHit(currenAttack, shipSpaces)) {
+      if (isShipSunk(ship, allAttacks)) {
+        return {
+          message: 'You just sank the ship',
+          shipTypes: ship.shipTypes
+        }
+      }
+      else {
+        return {
+          message: 'hit'
+        }
+      }
+    }
+  }
+}
 
+const isHit = (attack, coordinates) => _.some(coordinates, c => isSameCoordinate(attack.coordinates, c))  
+
+export function isShipSunk (ship, attacks) {
+  const shipSpaces = realSpace(ship)
+  let spaceLeft = shipSpaces.length
+  for (const attack of attacks) {
+    if (_.some(shipSpaces, s => isSameCoordinate(s, attack.coordinates))) {
+      spaceLeft--
+    }
+    if (spaceLeft === 0) return true
+  }
+  return false
 }

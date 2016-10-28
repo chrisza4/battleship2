@@ -4,6 +4,7 @@ import { isSameCoordinate } from './utils'
 import { shipSchemas } from '../data/ship-data'
 
 export async function place (placement, data) {
+  console.log(placement)
   const v = Joi.validate(placement, shipSchemas, { stripUnknown: true })
   if (v.error) {
     throw v.error

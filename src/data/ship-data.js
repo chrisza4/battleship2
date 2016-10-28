@@ -14,7 +14,7 @@ export const shipSchemas = Joi.object().keys({
     x: Joi.number().required(),
     y: Joi.number().required(),
   }).required(),
-  direction: Joi.string().valid([ 'vertical', 'horizontal' ]),
+  direction: Joi.string().valid([ 'vertical', 'horizontal' ]).default('vertical'),
   roundId: Joi.string().allow(null)
 }).required()
 

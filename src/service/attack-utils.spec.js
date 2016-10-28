@@ -74,7 +74,7 @@ describe('getAttackResult', () => {
         y: 0
       }
     })
-    expect(AttackUtils.getAttackResult(attack1, [ ], [ ship1 ])).to.equal('miss')
+    expect(AttackUtils.getAttackResult(attack1, [ ], [ ship1 ]).message).to.equal('miss')
   })
 
   it('should end the game if all ship is hit', () => {
@@ -104,6 +104,86 @@ describe('getAttackResult', () => {
         y: 3
       },
     })
-    expect(AttackUtils.getAttackResult(attack1, [ attack2, attack3 ], [ ship1 ])).to.equal('won')
+    expect(AttackUtils.getAttackResult(attack1, [ attack2, attack3 ], [ ship1 ]).message).to.equal('won')
+  })
+
+  it('should return sank ship type if last hit sank the submarine', () => {
+    const ship1 = createMockShip({
+      shipTypes: 4,
+      coordinates: {
+        x: 1,
+        y: 2
+      },
+      direction: 'vertical',
+    })
+    const ship2 = createMockShip({
+      shipTypes: 4,
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+      direction: 'vertical',
+    })
+    const attack1 = createMockAttack({
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+    })
+    const result = AttackUtils.getAttackResult(attack1, [ ], [ ship1, ship2 ])
+    expect(result.message).to.equal('You just sank the ship')
+    expect(result.shipTypes).to.equal(4)
+  })
+
+  it('should return sank ship type if last hit sank the battleship', () => {
+    const ship1 = createMockShip({
+      shipTypes: 4,
+      coordinates: {
+        x: 9,
+        y: 9
+      },
+      direction: 'vertical',
+    })
+    const ship2 = createMockShip({
+      shipTypes: 1,
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+      direction: 'vertical',
+    })
+    const attack1 = createMockAttack({
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+    })
+    const oldAttack1 = createMockAttack({ coordinates: { x: 1, y: 2 }})
+    const oldAttack2 = createMockAttack({ coordinates: { x: 1, y: 3 }})
+    const oldAttack3 = createMockAttack({ coordinates: { x: 1, y: 4 }})
+    const result = AttackUtils.getAttackResult(attack1, [ 
+      oldAttack1, oldAttack2, oldAttack3
+    ], [ ship1, ship2 ])
+    expect(result.message).to.equal('You just sank the ship')
+    expect(result.shipTypes).to.equal(1)
+  })
+
+  it('should return hit if the hit not sank any ship', () => {
+    const ship = createMockShip({
+      shipTypes: 1,
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+      direction: 'vertical',
+    })
+    const attack = createMockAttack({
+      coordinates: {
+        x: 1,
+        y: 1
+      },
+    })
+    const result = AttackUtils.getAttackResult(attack, [ ], [ ship ])
+    expect(result.message).to.equal('hit')
   })
 })
