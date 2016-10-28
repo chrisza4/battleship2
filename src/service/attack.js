@@ -17,5 +17,4 @@ export async function placeAttack (attack, data) {
   }
   const thisCoordinates = v.value.coordinates
 
-
 }
