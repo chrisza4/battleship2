@@ -1,4 +1,5 @@
 import { SHIP_TYPES } from '../data/ship-data'
+import { isSameCoordinate } from './utils'
 
 export function flatArrayWithFilter (doubleArray, filterer) {
   return doubleArray.reduce((acc, array) => {
@@ -19,10 +20,6 @@ export function getQuota (shipType) {
     case SHIP_TYPES.Submarines: return 4
     default: return 0
   }
-}
-
-export function isSameCoordinate (coor1, coor2) {
-  return coor1.x === coor2.x && coor1.y == coor2.y
 }
 
 function occupiedSpaceForSingleCoordinate (coordinate) {
